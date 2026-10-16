@@ -40,3 +40,15 @@ Set `VITE_API_URL` if the backend isn't on `http://localhost:8000`.
 
 - Never commit `backend/.env` (it's in `.gitignore`).
 - MongoDB Atlas only accepts IPs on its Network Access list. Add teammates' IPs, or `0.0.0.0/0` during development.
+
+## Projects (Features 2 and 3)
+
+Projects are stored in a **separate MongoDB database** (`MONGODB_PROJECTS_DB_NAME`, default `hardware_checkout_projects`) from users. Projects reference users by `userId` only (no cross-database joins).
+
+| Endpoint | Purpose |
+|---|---|
+| `POST /projects` | Create a project (creator becomes first member) |
+| `POST /projects/join` | Join an existing project by `projectId` |
+| `GET /projects?userId=` | List the projects a user belongs to |
+
+Frontend routes: `/login`, `/` (home, with link to projects), `/projects` (create / join / list). Run `npm install` again, since `react-router-dom` was added.

@@ -65,3 +65,25 @@ button:disabled { opacity: 0.6; cursor: default; }
   justify-content: center;
   padding: 16px;
 }
+
+/* ---- Projects pages ---- */
+.button {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+.page.wide { flex-direction: column; justify-content: flex-start; gap: 16px; }
+.page.wide > * { width: 100%; max-width: 780px; }
+.page.wide .card { max-width: none; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.topbar a { color: #2f6fdf; text-decoration: none; }
+.columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .columns { grid-template-columns: 1fr; } }
+button.small { padding: 4px 10px; font-size: 13px; margin-left: 8px; }
+.list ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.list li { padding: 10px 12px; border: 1px solid #e3e5e8; border-radius: 8px; }
+.list code { color: #656d76; margin-left: 6px; }
+.list .subtitle { margin: 2px 0 0; }

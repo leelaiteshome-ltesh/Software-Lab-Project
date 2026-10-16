@@ -8,7 +8,7 @@ load_dotenv()
 _client = None
 
 
-def get_database():
+def _get_client():
     """Connect to MongoDB Atlas once and reuse the connection."""
     global _client
     if _client is None:
@@ -16,4 +16,15 @@ def get_database():
         if not uri:
             raise RuntimeError("MONGODB_URI is missing. Add it to backend/.env")
         _client = MongoClient(uri)
-    return _client[os.getenv("MONGODB_DB_NAME", "hardware_checkout")]
+    return _client
+
+
+def get_database():
+    """Users database."""
+    return _get_client()[os.getenv("MONGODB_DB_NAME", "hardware_checkout")]
+
+
+def get_projects_database():
+    """Projects live in their own database so they can scale (or move to
+    their own cluster) independently of users."""
+    return _get_client()[os.getenv("MONGODB_PROJECTS_DB_NAME", "hardware_checkout_projects")]
