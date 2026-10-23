@@ -87,3 +87,27 @@ button.small { padding: 4px 10px; font-size: 13px; margin-left: 8px; }
 .list li { padding: 10px 12px; border: 1px solid #e3e5e8; border-radius: 8px; }
 .list code { color: #656d76; margin-left: 6px; }
 .list .subtitle { margin: 2px 0 0; }
+
+/* ---- Owner / member + hardware ---- */
+.hint { font-size: 12px; font-weight: 400; color: #656d76; }
+.meta { font-size: 13px; color: #656d76; margin-top: 2px; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.push-right { margin-left: auto; }
+.badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+.badge.owner { background: #e8f0fd; color: #1f4fb0; }
+.badge.member { background: #eef0f2; color: #57606a; }
+.project-link { display: block; color: inherit; text-decoration: none; }
+.list li:has(.project-link):hover { border-color: #2f6fdf; }
+.danger { background: #fff; border-color: #e5b3b3; color: #c62828; }
+.hw-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.hw-table th { text-align: left; font-weight: 600; color: #656d76; padding: 6px 8px; border-bottom: 1px solid #e3e5e8; }
+.hw-table td { padding: 10px 8px; border-bottom: 1px solid #f0f1f3; vertical-align: middle; }
+.hw-table .qty { width: 80px; padding: 6px 8px; }
+.hw-table .actions { white-space: nowrap; }
+.hw-table .actions button.small { margin-left: 0; margin-right: 6px; }
+@media (max-width: 640px) {
+  .hw-table, .hw-table tbody, .hw-table tr, .hw-table td { display: block; }
+  .hw-table thead { display: none; }
+  .hw-table tr { padding: 8px 0; border-bottom: 1px solid #e3e5e8; }
+  .hw-table td { border: none; padding: 4px 0; }
+}

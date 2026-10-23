@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { createProject, getMyProjects, joinProject } from "../api.js";
 
+// Same rules as the backend: 3-20 chars, starts with a letter, letters/numbers/-/_ only.
+const PROJECT_ID_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{2,19}$/;
+
 export default function ProjectsPage({ userId, onLogout }) {
   const [projects, setProjects] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
@@ -33,6 +36,10 @@ export default function ProjectsPage({ userId, onLogout }) {
     setCreateMsg({ type: "", text: "" });
     if (!name.trim() || !newId.trim()) {
       setCreateMsg({ type: "error", text: "Project name and ProjectID are required" });
+      return;
+    }
+    if (!PROJECT_ID_PATTERN.test(newId.trim())) {
+      setCreateMsg({ type: "error", text: "ProjectID doesn't follow the rules below" });
       return;
     }
     try {
@@ -81,15 +88,16 @@ export default function ProjectsPage({ userId, onLogout }) {
           <h2>Create new project</h2>
           <label>
             Name
-            <input value={name} onChange={(e) => setName(e.target.value)} />
+            <input value={name} maxLength={50} onChange={(e) => setName(e.target.value)} />
           </label>
           <label>
             Description
-            <input value={description} onChange={(e) => setDescription(e.target.value)} />
+            <input value={description} maxLength={200} onChange={(e) => setDescription(e.target.value)} />
           </label>
           <label>
             ProjectID
-            <input value={newId} onChange={(e) => setNewId(e.target.value)} />
+            <input value={newId} maxLength={20} onChange={(e) => setNewId(e.target.value)} />
+            <span className="hint">3-20 characters, starts with a letter. Letters, numbers, - and _ only.</span>
           </label>
           {createMsg.text && <p className={createMsg.type}>{createMsg.text}</p>}
           <button type="submit" className="primary">Create project</button>
@@ -116,8 +124,18 @@ export default function ProjectsPage({ userId, onLogout }) {
           <ul>
             {projects.map((p) => (
               <li key={p.projectId}>
-                <b>{p.name}</b> <code>{p.projectId}</code>
-                {p.description && <div className="subtitle">{p.description}</div>}
+                <Link to={`/projects/${encodeURIComponent(p.projectId)}`} className="project-link">
+                  <div className="row">
+                    <b>{p.name}</b> <code>{p.projectId}</code>
+                    <span className={`badge ${p.owner === userId ? "owner" : "member"}`}>
+                      {p.owner === userId ? "Owner" : "Member"}
+                    </span>
+                  </div>
+                  {p.description && <div className="subtitle">{p.description}</div>}
+                  <div className="meta">
+                    Owner: {p.owner} · {p.members.length} member{p.members.length === 1 ? "" : "s"}
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

@@ -28,3 +28,8 @@ def get_projects_database():
     """Projects live in their own database so they can scale (or move to
     their own cluster) independently of users."""
     return _get_client()[os.getenv("MONGODB_PROJECTS_DB_NAME", "hardware_checkout_projects")]
+
+
+def get_hardware_database():
+    """Hardware sets and per-project checkouts live in their own database."""
+    return _get_client()[os.getenv("MONGODB_HARDWARE_DB_NAME", "hardware_checkout_hardware")]
