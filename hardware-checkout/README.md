@@ -2,6 +2,9 @@
 
 FastAPI + MongoDB backend, React (Vite) frontend.
 
+## Project Diagram 
+<img width="1243" height="757" alt="image" src="https://github.com/user-attachments/assets/176456af-e321-40f8-ace6-5ce3850c3915" />
+
 ## Backend
 
 ```
