@@ -9,6 +9,9 @@ import {
   leaveProject,
   removeMember,
 } from "../api.js";
+import AppShell from "./AppShell.jsx";
+import { AlertIcon, ChevronLeftIcon, CpuIcon, LogOutIcon, TrashIcon, UsersIcon } from "./Icons.jsx";
+import { Avatar, CopyChip, Empty, Message, Meter, RoleBadge, Skeleton, SkeletonRows } from "./ui.jsx";
 
 export default function ProjectPage({ userId, onLogout }) {
   const { projectId } = useParams();
@@ -90,139 +93,225 @@ export default function ProjectPage({ userId, onLogout }) {
     });
   }
 
-  const topbar = (
-    <div className="topbar">
-      <Link to="/projects">← Projects</Link>
-      <span>
-        Signed in as <b>{userId}</b>{" "}
-        <button className="secondary small" onClick={onLogout}>
-          Log out
-        </button>
-      </span>
-    </div>
+  const back = (
+    <Link to="/projects" className="back-link">
+      <ChevronLeftIcon size={16} />
+      All projects
+    </Link>
   );
 
   if (loadError) {
     return (
-      <main className="page wide">
-        {topbar}
+      <AppShell userId={userId} onLogout={onLogout}>
+        <div>{back}</div>
         <div className="card">
-          <p className="error">{loadError}</p>
+          <Empty
+            icon={<AlertIcon size={22} />}
+            title="Couldn't open this project"
+            text={loadError}
+            action={
+              <Link to="/projects" className="btn secondary sm">
+                Back to projects
+              </Link>
+            }
+          />
         </div>
-      </main>
+      </AppShell>
     );
   }
 
   if (!project) {
     return (
-      <main className="page wide">
-        {topbar}
-        <div className="card">
-          <p className="subtitle">Loading...</p>
+      <AppShell userId={userId} onLogout={onLogout}>
+        <div className="skeleton-stack">
+          {back}
+          <Skeleton w={260} h={30} />
+          <Skeleton w={200} h={14} />
         </div>
-      </main>
+        <div className="card">
+          <SkeletonRows count={3} />
+        </div>
+      </AppShell>
     );
   }
 
+  const totalHeld = hardware.reduce((s, h) => s + h.checkedOut, 0);
+
   return (
-    <main className="page wide">
-      {topbar}
-
-      <div className="card">
-        <div className="title-row">
-          <h1>{project.name}</h1>
-          <span className={`badge ${isOwner ? "owner" : "member"}`}>{isOwner ? "Owner" : "Member"}</span>
-        </div>
-        <p className="subtitle">
-          <code>{project.projectId}</code>
-          {project.description && <> · {project.description}</>}
-        </p>
-      </div>
-
-      <div className="card">
-        <h2>Hardware</h2>
-        <table className="hw-table">
-          <thead>
-            <tr>
-              <th>Set</th>
-              <th>Capacity</th>
-              <th>Available</th>
-              <th>This project</th>
-              <th>Quantity</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {hardware.map((h) => (
-              <tr key={h.hwSetId}>
-                <td><b>{h.hwSetId}</b></td>
-                <td>{h.capacity}</td>
-                <td>{h.availability}</td>
-                <td>{h.checkedOut}</td>
-                <td>
-                  <input
-                    className="qty"
-                    inputMode="numeric"
-                    placeholder="0"
-                    value={quantities[h.hwSetId] || ""}
-                    onChange={(e) => setQuantities((q) => ({ ...q, [h.hwSetId]: e.target.value }))}
-                  />
-                </td>
-                <td className="actions">
-                  <button className="primary small" disabled={busy} onClick={() => handleHardware(h.hwSetId, "out")}>
-                    Check out
-                  </button>
-                  <button className="secondary small" disabled={busy} onClick={() => handleHardware(h.hwSetId, "in")}>
-                    Check in
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {hwMsg.text && <p className={hwMsg.type}>{hwMsg.text}</p>}
-      </div>
-
-      <div className="card list">
-        <h2>Members</h2>
-        <ul>
-          {project.members.map((m) => (
-            <li key={m} className="member-row">
-              <span>
-                {m} {m === project.owner && <span className="badge owner">Owner</span>}
-                {m === userId && <span className="subtitle inline"> (you)</span>}
+    <AppShell userId={userId} onLogout={onLogout}>
+      <div>
+        {back}
+        <div className="page-header">
+          <div>
+            <div className="title-row">
+              <h1>{project.name}</h1>
+              <RoleBadge owner={isOwner} />
+            </div>
+            <div className="project-meta">
+              <CopyChip value={project.projectId} />
+              <span className="dot">·</span>
+              <span className="meta-item">
+                <UsersIcon size={14} />
+                {project.members.length} member{project.members.length === 1 ? "" : "s"}
               </span>
-              {isOwner && m !== project.owner && (
-                <button className="secondary small" disabled={busy} onClick={() => handleRemove(m)}>
-                  Remove
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-        {memberMsg.text && <p className={memberMsg.type}>{memberMsg.text}</p>}
+              <span className="dot">·</span>
+              <span className="meta-item">
+                <CpuIcon size={14} />
+                {totalHeld} unit{totalHeld === 1 ? "" : "s"} checked out
+              </span>
+            </div>
+            {project.description && <p className="project-desc">{project.description}</p>}
+          </div>
+        </div>
       </div>
 
-      <div className="card">
-        {isOwner ? (
-          <>
-            <h2>Delete project</h2>
-            <p className="subtitle">All hardware must be checked in first.</p>
-            <button className="danger" disabled={busy} onClick={handleDelete}>
-              Delete project
-            </button>
-          </>
-        ) : (
-          <>
-            <h2>Leave project</h2>
-            <p className="subtitle">Hardware checked out to this project stays with it.</p>
-            <button className="danger" disabled={busy} onClick={handleLeave}>
-              Leave project
-            </button>
-          </>
+      <section className="card">
+        <div className="card-header">
+          <div>
+            <h2>Hardware</h2>
+            <p>Check units out to this project or return them to the shelf.</p>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Hardware set</th>
+                <th>Availability</th>
+                <th className="num">Held by project</th>
+                <th className="num">Quantity</th>
+                <th>
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {hardware.map((h) => (
+                <tr key={h.hwSetId}>
+                  <td>
+                    <div className="hw-name">
+                      <span className="hw-icon">
+                        <CpuIcon size={16} />
+                      </span>
+                      {h.hwSetId}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="avail-cell">
+                      <Meter value={h.availability} max={h.capacity} />
+                      <span className="meta">
+                        {h.availability} of {h.capacity} available
+                      </span>
+                    </div>
+                  </td>
+                  <td className="num">
+                    <span className={`held${h.checkedOut ? "" : " zero"}`}>{h.checkedOut}</span>
+                  </td>
+                  <td className="num">
+                    <input
+                      className="input sm"
+                      inputMode="numeric"
+                      placeholder="0"
+                      aria-label={`Quantity for ${h.hwSetId}`}
+                      value={quantities[h.hwSetId] || ""}
+                      onChange={(e) => setQuantities((q) => ({ ...q, [h.hwSetId]: e.target.value }))}
+                    />
+                  </td>
+                  <td>
+                    <div className="actions">
+                      <button className="btn primary sm" disabled={busy} onClick={() => handleHardware(h.hwSetId, "out")}>
+                        Check out
+                      </button>
+                      <button className="btn secondary sm" disabled={busy} onClick={() => handleHardware(h.hwSetId, "in")}>
+                        Check in
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {hwMsg.text && (
+          <div className="card-msg">
+            <Message msg={hwMsg} />
+          </div>
         )}
-        {manageMsg.text && <p className={manageMsg.type}>{manageMsg.text}</p>}
+      </section>
+
+      <div className="grid-2">
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h2>Members</h2>
+              <p>Everyone with access to this project</p>
+            </div>
+          </div>
+          <ul className="rows">
+            {project.members.map((m) => (
+              <li key={m} className="row">
+                <Avatar name={m} size={34} />
+                <div className="row-main">
+                  <div className="row-title">
+                    {m}
+                    {m === userId && <span className="muted you">(you)</span>}
+                  </div>
+                  <div className="row-sub">{m === project.owner ? "Owner" : "Member"}</div>
+                </div>
+                {isOwner && m !== project.owner && (
+                  <button className="btn ghost sm" disabled={busy} onClick={() => handleRemove(m)}>
+                    Remove
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+          {memberMsg.text && (
+            <div className="card-msg">
+              <Message msg={memberMsg} />
+            </div>
+          )}
+        </section>
+
+        <section className="card danger-zone">
+          <div className="card-header">
+            <div>
+              <h2>Danger zone</h2>
+              <p>These actions can't be undone.</p>
+            </div>
+          </div>
+          <div className="danger-row">
+            {isOwner ? (
+              <>
+                <div>
+                  <b>Delete this project</b>
+                  <p>All hardware must be checked in first.</p>
+                </div>
+                <button className="btn danger-outline" disabled={busy} onClick={handleDelete}>
+                  <TrashIcon size={16} />
+                  Delete project
+                </button>
+              </>
+            ) : (
+              <>
+                <div>
+                  <b>Leave this project</b>
+                  <p>Hardware checked out to this project stays with it.</p>
+                </div>
+                <button className="btn danger-outline" disabled={busy} onClick={handleLeave}>
+                  <LogOutIcon size={16} />
+                  Leave project
+                </button>
+              </>
+            )}
+          </div>
+          {manageMsg.text && (
+            <div className="card-msg">
+              <Message msg={manageMsg} />
+            </div>
+          )}
+        </section>
       </div>
-    </main>
+    </AppShell>
   );
 }
