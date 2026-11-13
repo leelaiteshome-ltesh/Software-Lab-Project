@@ -48,10 +48,50 @@ Set `VITE_API_URL` if the backend isn't on `http://localhost:8000`.
 
 Projects are stored in a **separate MongoDB database** (`MONGODB_PROJECTS_DB_NAME`, default `hardware_checkout_projects`) from users. Projects reference users by `userId` only (no cross-database joins).
 
+Document: `projects {projectId, name, description, owner, members[], createdAt}`
+
 | Endpoint | Purpose |
 |---|---|
-| `POST /projects` | Create a project (creator becomes first member) |
+| `POST /projects` | Create a project (creator becomes owner + first member) |
 | `POST /projects/join` | Join an existing project by `projectId` |
 | `GET /projects?userId=` | List the projects a user belongs to |
+| `GET /projects/{id}?userId=` | Project details (members only) |
+| `POST /projects/{id}/leave` | Member leaves (body: `{userId}`) |
+| `DELETE /projects/{id}/members/{m}?userId=` | Owner removes member `m` |
+| `DELETE /projects/{id}?userId=` | Owner deletes the project |
 
-Frontend routes: `/login`, `/` (home, with link to projects), `/projects` (create / join / list). Run `npm install` again, since `react-router-dom` was added.
+Rules (`services/project_service.py`):
+- ProjectID (no spaces, max 40 chars), name (max 80) and description (max 500) are validated
+- The creator must be a real user, and becomes owner + first member
+- Only the owner can remove members or delete the project
+- The owner can't leave their own project
+- Delete is blocked while the project still has hardware checked out
+
+## Hardware
+
+Hardware lives in a **third database** (`MONGODB_HARDWARE_DB_NAME`, default `hardware_checkout_hardware`):
+
+- `hardware_sets {hwSetId, capacity, availability}`: HWSet1 and HWSet2 are created automatically the first time the API is used (capacity 100 each; change with `HWSET1_CAPACITY` / `HWSET2_CAPACITY` in `.env` before first run)
+- `checkouts {projectId, hwSetId, quantity}`: how many units each project holds
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /hardware` | Capacity and availability of every set |
+| `GET /hardware/projects/{id}?userId=` | Every set + how many units this project holds |
+| `POST /hardware/checkout` | Body: `{userId, projectId, hwSetId, quantity}` |
+| `POST /hardware/checkin` | Same body |
+
+Rules (`services/hardware_service.py`):
+- Members only
+- Quantity must be a whole number >= 1
+- Can't take more than is available
+- Can't return more than the project holds
+
+Availability and project holdings are updated with conditional MongoDB updates, so two people checking out at the same time can't push either below 0.
+
+## Frontend routes
+
+- `/login`: sign in / new user
+- `/`: home
+- `/projects`: create, join, and list your projects (with Owner / Member badge)
+- `/projects/:projectId`: hardware table (check out / check in), members list, remove member (owner), delete project (owner), leave project (member)
