@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createProject, getMyProjects, joinProject } from "../api.js";
 
 export default function ProjectsPage({ userId, onLogout }) {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
 
@@ -41,7 +42,7 @@ export default function ProjectsPage({ userId, onLogout }) {
       setName("");
       setDescription("");
       setNewId("");
-      refresh();
+      navigate(`/projects/${encodeURIComponent(p.projectId)}`);
     } catch (err) {
       setCreateMsg({ type: "error", text: err.message });
     }
@@ -58,7 +59,7 @@ export default function ProjectsPage({ userId, onLogout }) {
       const p = await joinProject(userId, existingId);
       setJoinMsg({ type: "notice", text: `Joined "${p.name}"` });
       setExistingId("");
-      refresh();
+      navigate(`/projects/${encodeURIComponent(p.projectId)}`);
     } catch (err) {
       setJoinMsg({ type: "error", text: err.message });
     }
@@ -116,8 +117,13 @@ export default function ProjectsPage({ userId, onLogout }) {
           <ul>
             {projects.map((p) => (
               <li key={p.projectId}>
-                <b>{p.name}</b> <code>{p.projectId}</code>
-                {p.description && <div className="subtitle">{p.description}</div>}
+                <Link to={`/projects/${encodeURIComponent(p.projectId)}`} className="project-link">
+                  <b>{p.name}</b> <code>{p.projectId}</code>
+                  <span className={`badge ${p.owner === userId ? "owner" : "member"}`}>
+                    {p.owner === userId ? "Owner" : "Member"}
+                  </span>
+                  {p.description && <div className="subtitle">{p.description}</div>}
+                </Link>
               </li>
             ))}
           </ul>

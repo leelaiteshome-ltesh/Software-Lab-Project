@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from controllers.hardware_controller import router as hardware_router
 from controllers.project_controller import router as project_router
 from controllers.user_controller import router as user_router
 
 app = FastAPI(
     title="Hardware Set Checkout System API",
-    description="Swagger UI for testing endpoints. Features: users (sign up, login) and projects (create, join, list).",
+    description="Swagger UI for testing endpoints. Features: users (sign up, login), projects (create, join, manage members) and hardware (check out / check in).",
 )
 
 app.add_middleware(
@@ -18,6 +19,7 @@ app.add_middleware(
 
 app.include_router(user_router)
 app.include_router(project_router)
+app.include_router(hardware_router)
 
 
 @app.get("/", tags=["Health"])
