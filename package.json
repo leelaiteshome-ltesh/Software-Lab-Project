@@ -1,0 +1,11 @@
+{
+  "name": "hardware-checkout-heroku",
+  "private": true,
+  "description": "Heroku build: builds the React frontend so the FastAPI backend can serve it.",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "heroku-postbuild": "cd hardware-checkout/frontend && npm ci --include=dev && npm run build"
+  }
+}
