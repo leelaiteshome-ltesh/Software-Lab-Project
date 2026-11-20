@@ -44,6 +44,10 @@ Set `VITE_API_URL` if the backend isn't on `http://localhost:8000`.
 - Never commit `backend/.env` (it's in `.gitignore`).
 - MongoDB Atlas only accepts IPs on its Network Access list. Add teammates' IPs, or `0.0.0.0/0` during development.
 
+## Database connections
+
+Users, projects and hardware are three separate databases, and each one has **its own MongoDB connection** (`backend/db.py`). By default all three connect with `MONGODB_URI`; set `MONGODB_USERS_URI`, `MONGODB_PROJECTS_URI` or `MONGODB_HARDWARE_URI` in `backend/.env` to put a database on a different cluster.
+
 ## Projects (Features 2 and 3)
 
 Projects are stored in a **separate MongoDB database** (`MONGODB_PROJECTS_DB_NAME`, default `hardware_checkout_projects`) from users. Projects reference users by `userId` only (no cross-database joins).
