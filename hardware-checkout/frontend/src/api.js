@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+// Local dev: the backend runs separately on port 8000.
+// Hosted build: the backend serves this app, so the API is on the same site under /api.
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "/api" : "http://localhost:8000");
 
 async function request(method, path, body) {
   let res;

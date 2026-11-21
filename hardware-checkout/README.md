@@ -99,3 +99,14 @@ Availability and project holdings are updated with conditional MongoDB updates, 
 - `/`: home
 - `/projects`: create, join, and list your projects (with Owner / Member badge)
 - `/projects/:projectId`: hardware table (check out / check in), members list, remove member (owner), delete project (owner), leave project (member)
+
+## Hosting on Heroku
+
+The hosted app runs as **one Heroku web dyno**: the build compiles the React app (`frontend/dist`) and FastAPI serves it, with the API also available under `/api`. Locally nothing changes (run backend and frontend separately as above).
+
+Files at the repo root that Heroku uses: `Procfile`, `requirements.txt`, `.python-version`, `package.json`.
+
+1. Create a Heroku app, then in **Settings → Buildpacks** add `heroku/nodejs` first and `heroku/python` second.
+2. In **Settings → Config Vars** add `MONGODB_URI` (and optionally the three `MONGODB_*_DB_NAME` values) from `backend/.env`.
+3. In **Deploy**, connect this GitHub repo and deploy the branch.
+4. In MongoDB Atlas **Network Access**, allow `0.0.0.0/0` (Heroku has no fixed outbound IP).
